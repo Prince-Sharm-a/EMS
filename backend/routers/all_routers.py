@@ -98,7 +98,7 @@ async def assign_project(response:projectAssign,db:Session=Depends(get_db),rdb:S
             pj_id=response.pj_id
         )
         db.add(new_assign_project) 
-        db.commit
+        db.commit()
         
     
         return new_assign_project
