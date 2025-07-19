@@ -105,89 +105,129 @@ async def assign_project(response:projectAssign,db:Session=Depends(get_db),rdb:S
     except Exception as e:
         raise HTTPException(status_code=500,detail=f'Not found!\n{e}')
     
-@emp.put('/Update_name')
-def update_table(response:updateResponse,background_Tasks:BackgroundTasks):
-    try :
-        if response.table_name=='employee':
-            background_Tasks.add_task(
-                update_employee,
-                response
-            )
+@emp.put('/Update_tables')
+async def update_table(response:updateResponse,background_Tasks:BackgroundTasks):
+    tables=('employee','department','projects')
+    if response.table_name not in tables:
+        
+        raise HTTPException(status_code=500,detail={"error":"Table is not selected"})
+    else :
+        try :
+            # print(response)
             
-            return {"Updation":"Successful","Table":"employee","Data":AddingNewEmployee(
-                e_id=response.e_id,
-                e_name=response.e_name,
-                e_email=response.e_email,
-                e_mobile_code=response.e_phone_code,
-                e_mobile_no=response.e_phone_no,
-                e_address=response.e_address,
-                e_department=response.e_department,
+            if response.table_name=='employee':
                 
-            )}
-        elif response.table_name=='department':
-            background_Tasks.add_task(
-                update_department,
-                response
-            )
-            
-            return {"Updation":"Successful","Table":"department","Data":departmentResponse(
-                d_name=response.d_name,
-                d_description=response.d_description,
-                d_location=response.d_location                
-            )}
-        elif response.table_name=='projects':
-            background_Tasks.add_task(
-                update_project,
-                response
-            )
-            return {"Updation":"Successfull","Table":"projects","Data":AddingNewProject(
-                pj_name=response.pj_name,
-                pj_description=response.pj_description,
-            )}
-        else :
-            raise HTTPException(status_code=404,detail="Table is not selected")
-    except Exception as e:
-        raise HTTPException(status_code=404,detail=f'Cannot find data based on given id on the given table {e}')
+                background_Tasks.add_task(
+                    update_employee,
+                    response
+                )
+                # await update_employee(response)
+                
+                return {"Updation":"Successful","Table":"employee","Data":response}
+            elif response.table_name=='department':
+                background_Tasks.add_task(
+                    update_department,
+                    response
+                )
+                
+                return {"Updation":"Successful","Table":"department","Data":departmentResponse(
+                    d_name=response.d_name,
+                    d_description=response.d_description,
+                    d_location=response.d_location                
+                )}
+            elif response.table_name=='projects':
+                background_Tasks.add_task(
+                    update_project,
+                    response
+                )
+                return {"Updation":"Successfull","Table":"projects","Data":AddingNewProject(
+                    pj_name=response.pj_name,
+                    pj_description=response.pj_description,
+                )}
+        except Exception as e:
+            raise HTTPException(status_code=500,detail=f'{response.e_id} Cannot find data based on given id on the given table {e}')
 
 def update_employee(response:updateResponse):
-    try :
-        db=SessionLocal()
-        emp_person=db.query(Employee).filter(Employee.e_id==response.id).first()
-        emp_person.e_full_name=response
-        db.commit()
-        
-    except Exception as e:
-        raise HTTPException(status_code=500,detail=f"Employee table Updation failed \n{e}")
-    finally :
-        db.close()
+    # print("reached update_employee function")
+    db=SessionLocal()
+    if response.e_id is None :
+        print({"error":"e_id is not given"})
+        return {"error":"e_id is not given"}
+    else:
+        try :
+            
+            emp_person=db.query(Employee).filter(Employee.e_id==response.e_id).first()
+            
+            if not emp_person:
+                return {"error": "Employee not found for given e_id"}
+            
+            if response.e_name is not '0' :
+                emp_person.e_full_name=response.e_name.title()
+            if response.e_address is not '0' :
+                emp_person.e_address=response.e_address
+            if response.e_phone_code!='+91':
+                emp_person.e_phone_code=response.e_phone_code
+            if response.e_phone_no is not '0' and  len(response.e_phone_no)==10:
+                emp_person.e_phone_no=response.e_phone_no
+            if response.e_email is not '0':
+                emp_person.e_email=response.e_email
+            if response.e_department :
+                emp_person.e_department=response.e_department
+            db.commit()
+            
+            upd_payroll=db.query(Payroll).filter(Payroll.e_id==response.e_id).first()
+            if response.Salary_Before_Deduction :
+                upd_payroll.Salary_Before_Deduction=response.Salary_Before_Deduction
+                upd_payroll.Salary_After_Deduction=upd_payroll.Salary_Before_Deduction-((upd_payroll.Salary_Before_Deduction/100)*6)
+                upd_payroll.per_hour_salary=((upd_payroll.Salary_After_Deduction/12)/30)/8
+                
+            db.commit()
+            
+        except Exception as e:
+            raise HTTPException(status_code=500,detail=f"Employee table Updation failed \n{e}")
+        finally :
+            db.close()
     
 def update_department(response:updateResponse):
-    try:
-        db=SessionLocal()
-        upd_dep=db.query(Department).filter(Department.d_id==response.d_id).first()
-        upd_dep.d_name=response.d_name
-        upd_dep.d_description=response.d_description
-        upd_dep.d_location=response.d_location
+    db=SessionLocal()
+    if response.d_id is None:
+        print({"error":"d_id is not given"})
+        return {"error":"d_id is not given"}
+    else :
+        try:
+            upd_dep=db.query(Department).filter(Department.d_id==response.d_id).first()
+            if response.d_name is not '0':
+                upd_dep.d_name=response.d_name
+            if response.d_description is not '0' :
+                upd_dep.d_description=response.d_description
+            if response.d_location :
+                upd_dep.d_location=response.d_location
+            
+            db.commit()
         
-        db.commit()
-    
-    except Exception as e:
-        raise HTTPException(status_code=500,detail=f"Departement table Updation failed \n{e}")
-    finally :
-        db.close()
+        except Exception as e:
+            raise HTTPException(status_code=500,detail=f"Departement table Updation failed \n{e}")
+        finally :
+            db.close()
     
 def update_project(response:updateResponse):
-    try:
-        db=SessionLocal()
-        upd_proj=db.query(Project).filter(Project.pj_id==response.pj_id).first()
-        
-        upd_proj.pj_name=response.pj_name
-        upd_proj.pj_description=response.pj_description
-        
-    except Exception as e:
-        raise HTTPException(status_code=500,detail=f"Project table Updation failed \n{e}")
-    finally :
-        db.close()
+    db=SessionLocal()
+    if response.pj_id is None:
+        print({"error":"pj_id is not given"})
+        return {"error":"pj_id is not given"}
+    else:
+        try:
+            upd_proj=db.query(Project).filter(Project.pj_id==response.pj_id).first()
+            
+            if response.pj_name is not '0':
+                upd_proj.pj_name=response.pj_name
+            if response.pj_description is not '0':
+                upd_proj.pj_description=response.pj_description
+            
+        except Exception as e:
+            raise HTTPException(status_code=500,detail=f"Project table Updation failed \n{e}")
+        finally :
+            db.close()
     
 @emp.post("/adding_department")
 def adding_department(response:departmentResponse,db:Session=Depends(get_db)):
