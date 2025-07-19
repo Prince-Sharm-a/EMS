@@ -151,6 +151,7 @@ def update_employee(response:updateResponse):
     # print("reached update_employee function")
     db=SessionLocal()
     if response.e_id is None :
+        print({"error":"e_id is not given"})
         return {"error":"e_id is not given"}
     else:
         try :
@@ -190,7 +191,8 @@ def update_employee(response:updateResponse):
 def update_department(response:updateResponse):
     db=SessionLocal()
     if response.d_id is None:
-        return {"d_id":"d_id is not given"}
+        print({"error":"d_id is not given"})
+        return {"error":"d_id is not given"}
     else :
         try:
             upd_dep=db.query(Department).filter(Department.d_id==response.d_id).first()
@@ -211,6 +213,7 @@ def update_department(response:updateResponse):
 def update_project(response:updateResponse):
     db=SessionLocal()
     if response.pj_id is None:
+        print({"error":"pj_id is not given"})
         return {"error":"pj_id is not given"}
     else:
         try:
