@@ -48,7 +48,7 @@ create_database(project_database)
 
 engine=create_engine(f"mysql+pymysql://{settings.DB_USER}:{settings.PASSWORD.replace('@','%40')}@{settings.HOST}:{settings.DB_PORT}/{project_database}")
 
-SessionLocal=sessionmaker(autocommit=False,autoflush=False,bind=engine)
+SessionLocal=sessionmaker(bind=engine)
 
 def get_db():
     db=SessionLocal()

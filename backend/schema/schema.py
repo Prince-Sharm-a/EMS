@@ -28,9 +28,9 @@ class AddingNewEmployee(BaseModel):
     e_email:str
     e_mobile_code:Optional[str]="+91"
     e_mobile_no:str
-    e_address:Optional[str]=0
+    e_address:Optional[str]=None
     e_department:Optional[int]=0
-    e_joining_date:Optional[datetime]=0
+    e_joining_date:Optional[datetime]=None
     e_salary:float
     
     class Config:
@@ -38,7 +38,7 @@ class AddingNewEmployee(BaseModel):
     
 class departmentResponse(BaseModel):
     d_name:str
-    d_description:Optional[str]=0
+    d_description:Optional[str]=None
     d_location:int
     
     class Config:
@@ -48,16 +48,16 @@ class departmentResponse(BaseModel):
 
 class projectAssign(BaseModel):
     e_id:int
-    e_full_name:Optional[str]=0
+    e_full_name:Optional[str]=None
     pj_id:int
-    pj_name:Optional[str]=0
-    pj_description:Optional[str]=0
+    pj_name:Optional[str]=None
+    pj_description:Optional[str]=None
     
     class Config:
         from_attributes=True
         
 class AddingNewProject(BaseModel):
-    pj_name:Optional[str]=0
+    pj_name:Optional[str]=None
     pj_description:Optional[str]=pj_name
     
     class Config:
@@ -78,26 +78,25 @@ class checkOut(BaseModel):
         from_attributes=True
         
 class updateResponse(BaseModel):
-    e_id:Optional[int]=0
-    e_name:Optional[str]=0
-    e_address:Optional[str]=0
+    e_id:Optional[int]=None
+    e_name:Optional[str]=None
+    e_address:Optional[str]=None
     e_phone_code:Optional[str]='+91'
-    e_email:Optional[str]=0
-    e_phone_no:Optional[str]=0
-    e_department:Optional[int]=0
-    Salary_Before_Deduction:Optional[float]=0
+    e_email:Optional[str]=None
+    e_phone_no:Optional[str]=None
+    e_department:Optional[int]=None
     
-    d_id:Optional[int]=0
-    d_name:Optional[str]=0
-    d_description:Optional[str]=0
-    d_location:Optional[int]=0
+    d_id:Optional[str]=None
+    d_name:Optional[str]=None
+    d_description:Optional[str]=None
+    d_location:Optional[str]=None
+    Salary_Before_Deduction:Optional[float]=None
     
-    pj_id:Optional[int]=0
-    pj_name:Optional[str]=0
-    pj_description:Optional[str]=0
+    pj_id:Optional[int]=None
+    pj_name:Optional[str]=None
+    pj_description:Optional[str]=None
     
     table_name:str
-    
     class Config:
         from_attributes=True
 
