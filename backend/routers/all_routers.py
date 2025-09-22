@@ -55,7 +55,7 @@ async def get_employee_details(
         cursor.execute(query)
         result= cursor.fetchall()
         
-        return list(row for row in result)
+        return result
     except Exception as e:
         if e_id or d_id:
             raise HTTPException(status_code=404,detail=f"user not found \n{e}")
